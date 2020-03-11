@@ -25,10 +25,12 @@ scale = 0.00392
 translator= Translator(to_lang=language)
 
 
-
 def say_bitch(a, lang):
     tts = pyttsx3.init()
-
+    if lang == 'ru':
+        lang = 'en'
+    else:
+        lang = 'ru'
     voices = tts.getProperty('voices')
 
     # Задать голос по умолчанию
@@ -45,6 +47,7 @@ def say_bitch(a, lang):
         for voice in voices:
             # if voice.name == 'Alexandr':
             tts.setProperty('voice', voice.id)
+            
     tts.say(a)
     tts.runAndWait()
 
@@ -104,6 +107,7 @@ def preprocess(frame, single, net, classes, classes_en, dict_classes):
     class_ids = []
     confidences = []
     boxes = []
+    bosces = []
     conf_threshold = 0.5
     nms_threshold = 0.4
     outs = net.forward(get_output_layers(net))
@@ -125,10 +129,13 @@ def preprocess(frame, single, net, classes, classes_en, dict_classes):
                 class_ids.append(class_id)
                 confidences.append(float(confidence))
                 s = h * w
+                bosces.append([x, y, w, h])
                 boxes.append([x, y, w, h, class_id, float(confidence), s])
                 classes_ids.append(classes[class_id])
+    #print(boxes)
+    #boxes = np.array(boxes)
 
-    indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
+    indices = cv2.dnn.NMSBoxes(bosces, confidences, conf_threshold, nms_threshold)
     if single:
         if len(boxes) !=0:
             boxes = sorted(boxes, key=lambda x: x[-1])
@@ -165,8 +172,10 @@ def preprocess(frame, single, net, classes, classes_en, dict_classes):
                 d = dict()
                 for i in s:
                     d.update({i: classes_ids.count(i)})
+
         else:
             d = {'Nothing': ' '}
+
     return frame, indices, boxes, classes_ids, d
 
 
@@ -177,6 +186,7 @@ def finder(frame,  find_class, language, classes, classes_en, dict_classes, Stop
     class_ids = []
     confidences = []
     boxes = []
+    boskes = []
     conf_threshold = 0.5
     nms_threshold = 0.4
     outs = net.forward(get_output_layers(net))
@@ -201,9 +211,10 @@ def finder(frame,  find_class, language, classes, classes_en, dict_classes, Stop
                 class_ids.append(class_id)
                 confidences.append(float(confidence))
                 s = h * w
+                boskes.append([x, y, w, h])
                 boxes.append([x, y, w, h, classes[class_id], s])
                 classes_ids.append(classes[class_id])
-        indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
+        indices = cv2.dnn.NMSBoxes(boskes, confidences, conf_threshold, nms_threshold)
 
         for i in indices:
             i = i[0]
@@ -483,8 +494,6 @@ class InterfaceManager(MDApp, BoxLayout, App):#, FocusBehavior, LayoutSelectionB
             self.main_layout.add_widget(self.img1)
             self.main_layout_1.add_widget(self.btn)
             self.main_layout_1.add_widget(self.btn_2)
-            self.main_layout.add_widget(self.main_layout_1)
-            self.main_layout_1 = BoxLayout(orientation="horizontal")
             self.main_layout_1.add_widget(self.first)
             self.main_layout_1.add_widget(self.btn_3)
             self.main_layout.add_widget(self.main_layout_1)
@@ -537,7 +546,6 @@ class InterfaceManager(MDApp, BoxLayout, App):#, FocusBehavior, LayoutSelectionB
             else:
                 if self.Start:
                     frame, self.Stop, self.p = finder(frame, self.find, self.lang, self.classes, self.classes_en, self.dict_classes)
-
             frame = cv2.flip(frame, 0)
             buf = frame.tostring()
             texture1 = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
@@ -555,7 +563,7 @@ class InterfaceManager(MDApp, BoxLayout, App):#, FocusBehavior, LayoutSelectionB
                     translation = self.translator.translate(str(d[i]) + ' ' + i + 'es')
                 else:
                     translation = self.translator.translate(str(d[i]) + ' ' + i)
-            say_bitch(self.translator.translate('{}'.format(translation)), self.lang)
+            say_bitch((translation), self.lang)
 
     def callback_2(self, event):
         if self.single:
