@@ -13,4 +13,4 @@ Yolov3-веса слишком велики, чтобы загрузить ег�
 
 Полный вес: https://drive.google.com/file/d/1FJH7xwBYoKAJaGYoqNtaD4VdqZXHFOjP/view?usp=sharing
 
-Крошечные веса: https://drive.google.com/file/d/13gsUpEdAZgiOjsEb_E5irdnuHaXnaZ3G/view?usp=sharing
+Легкие веса: https://drive.google.com/file/d/13gsUpEdAZgiOjsEb_E5irdnuHaXnaZ3G/view?usp=sharing
